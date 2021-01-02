@@ -3,6 +3,7 @@
 
 #include <rrapi_RRWsdlBindingProxy.h>
 #include <vector>;
+#include <map>;
 
 using namespace std;
 
@@ -30,6 +31,7 @@ public:
 
 class DllExport TRS_Tower {
 public:
+	int TowerID;
 	double Latitude = 0.0;
 	double Longitude = 0.0;
 	double Elevation = 0.0;
@@ -98,15 +100,15 @@ class DllExport TRS_Site {
 public:
 	TRS_Site_Header Header;
 	vector<TRS_Site_Freq> Frequencies;
-	vector<TRS_Tower> Towers;
+	map<int, TRS_Tower> Towers;
 };
 
 class DllExport TRS_System {
 public:
 	TRS_SystemHeader Header;
-	vector<TRS_Site> Sites;
-	vector<TRS_Talkgroup> Talkgroups;
-	vector<TRS_Talkgroup_Category> TalkgroupCategories;
+	map<int, TRS_Site> Sites;
+	map<int, TRS_Talkgroup> Talkgroups;
+	map<int, TRS_Talkgroup_Category> TalkgroupCategories;
 };
 
 class DllExport RRAPI_Aggregator {
@@ -121,8 +123,8 @@ private:
 	SimpleType _getTRSFlavor(const int id);
 	TRS_SystemHeader _getTRS_System_Header(const string sysid);
 	vector<string> _extractLicenseCallsigns(TrsSiteLicenses* const licenses);
-	vector<TRS_Tower> _getTRS_Callsign_Towers(const vector<string>  callSigns);
-	vector<TRS_Site> _getTRS_SystemSites(const int systemId);
-	vector<TRS_Talkgroup_Category> _getTRS_Talkgroup_Categories(const int systemId);
-	vector<TRS_Talkgroup> _getTRS_Talkgroups(const int systemId, const int catId = 0, const int tagId = 0, const int tgDecId = 0);
+	map<int, TRS_Tower> _getTRS_Callsign_Towers(const vector<string>  callSigns);
+	map<int, TRS_Site> _getTRS_SystemSites(const int systemId);
+	map<int, TRS_Talkgroup_Category> _getTRS_Talkgroup_Categories(const int systemId);
+	map<int, TRS_Talkgroup> _getTRS_Talkgroups(const int systemId, const int catId = 0, const int tagId = 0, const int tgDecId = 0);
 };

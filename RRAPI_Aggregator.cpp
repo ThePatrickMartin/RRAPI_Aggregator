@@ -106,9 +106,9 @@ vector<string> RRAPI_Aggregator::_extractLicenseCallsigns(TrsSiteLicenses* const
 	return ret;
 }
 
-vector<TRS_Tower> RRAPI_Aggregator::_getTRS_Callsign_Towers(const vector<string> callSigns) {
+map<int, TRS_Tower> RRAPI_Aggregator::_getTRS_Callsign_Towers(const vector<string> callSigns) {
 	//call fccCallsign for each call sign
-	vector<TRS_Tower> ret;
+	map<int, TRS_Tower> ret;
 	for (auto const& c : callSigns) {
 		ns1__fccGetCallsignResponse resp;
 		int s1 = _rrapi.fccGetCallsign(c, &_auth, resp);
@@ -121,6 +121,7 @@ vector<TRS_Tower> RRAPI_Aggregator::_getTRS_Callsign_Towers(const vector<string>
 				//Get TOWER/MAST locations only
 				if (loc->type == "TOWER" || loc->type == "MAST") {
 					TRS_Tower t;
+					t.TowerID = stoi(loc->towerId);
 					t.Address = loc->address;
 					t.Elevation = stod(loc->antennaHeight);
 					t.City = loc->city;
@@ -129,7 +130,7 @@ vector<TRS_Tower> RRAPI_Aggregator::_getTRS_Callsign_Towers(const vector<string>
 					t.Longitude = stod(loc->lon);
 					t.State = loc->state;
 
-					ret.push_back(t);
+					ret.insert(pair<int, TRS_Tower>(t.TowerID, t));
 				}
 			}
 		}
@@ -138,8 +139,8 @@ vector<TRS_Tower> RRAPI_Aggregator::_getTRS_Callsign_Towers(const vector<string>
 	return ret;
 }
 
-vector<TRS_Site> RRAPI_Aggregator::_getTRS_SystemSites(const int systemId) {
-	vector<TRS_Site> ret;
+map<int, TRS_Site> RRAPI_Aggregator::_getTRS_SystemSites(const int systemId) {
+	map<int, TRS_Site> ret;
 	ns1__getTrsSitesResponse resp;
 
 	int s1 = _rrapi.getTrsSites(systemId, &_auth, resp);
@@ -179,15 +180,15 @@ vector<TRS_Site> RRAPI_Aggregator::_getTRS_SystemSites(const int systemId) {
 					}
 				}
 
-				ret.push_back(s);
+				ret.insert(pair<int, TRS_Site>(s.Header.SiteID, s));
 			}
 		}
 	}
 	return ret;
 }
 
-vector<TRS_Talkgroup_Category> RRAPI_Aggregator::_getTRS_Talkgroup_Categories(const int systemId) {
-	vector<TRS_Talkgroup_Category> ret;
+map<int, TRS_Talkgroup_Category> RRAPI_Aggregator::_getTRS_Talkgroup_Categories(const int systemId) {
+	map<int, TRS_Talkgroup_Category> ret;
 	ns1__getTrsTalkgroupCatsResponse resp;
 	int s1 = _rrapi.getTrsTalkgroupCats(systemId, &_auth, resp);
 	if (s1 != SOAP_OK) { throw exception(_rrapi.soap_fault_string()); }
@@ -206,7 +207,7 @@ vector<TRS_Talkgroup_Category> RRAPI_Aggregator::_getTRS_Talkgroup_Categories(co
 				cat.Longitude = stod(cats[iCatIdx]->lon);
 				cat.Range = stod(cats[iCatIdx]->range);
 
-				ret.push_back(cat);
+				ret.insert(pair<int, TRS_Talkgroup_Category>(cat.CategoryID, cat));
 			}
 		}
 	}
@@ -214,8 +215,8 @@ vector<TRS_Talkgroup_Category> RRAPI_Aggregator::_getTRS_Talkgroup_Categories(co
 	return ret;
 }
 
-vector<TRS_Talkgroup> RRAPI_Aggregator::_getTRS_Talkgroups(const int systemId, const int catId, const int tagId, const int tgDecId) {
-	vector<TRS_Talkgroup> ret;
+map<int, TRS_Talkgroup> RRAPI_Aggregator::_getTRS_Talkgroups(const int systemId, const int catId, const int tagId, const int tgDecId) {
+	map<int, TRS_Talkgroup> ret;
 	ns1__getTrsTalkgroupsResponse resp;
 	int s1 = _rrapi.getTrsTalkgroups(systemId, catId, tagId, tgDecId, &_auth, resp);
 	if (s1 != SOAP_OK) { throw exception(_rrapi.soap_fault_string()); }
@@ -238,7 +239,7 @@ vector<TRS_Talkgroup> RRAPI_Aggregator::_getTRS_Talkgroups(const int systemId, c
 						tg.Tags.push_back(tag);
 					}
 				}
-				ret.push_back(tg);
+				ret.insert(pair<int, TRS_Talkgroup>(tg.TGID, tg));
 			}
 		}
 	}
